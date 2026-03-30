@@ -1,0 +1,6 @@
+nginx.org
+apache.org
+httpbin.org
+test.rebex.net
+ftp.debian.org
+speedtest.tele2.net

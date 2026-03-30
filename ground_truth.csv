@@ -1,0 +1,7 @@
+host,expected_service
+apache.org,Varnish
+nginx.org,nginx
+httpbin.org,gunicorn
+test.rebex.net,Microsoft-IIS
+ftp.debian.org,Apache
+speedtest.tele2.net,nginx
