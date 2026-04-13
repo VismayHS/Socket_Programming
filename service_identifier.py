@@ -7,25 +7,32 @@ def identify_service(banner):
     # Return unavailable when no banner text is present.
     if not banner:
         return "Unavailable"
-    # Normalize text for case-insensitive keyword checks.
-    lowered_banner = banner.lower()
-    # Treat known transport or resolution failures as unavailable service state.
-    if (
-        "error" in lowered_banner
-        or "timeout" in lowered_banner
-        or "dns error" in lowered_banner
-        or "ssl error" in lowered_banner
-    ):
+    # Remove leading/trailing whitespace so status checks are not affected by line endings.
+    cleaned_banner = banner.strip()
+    # Normalize text for case-insensitive matching across known failure markers.
+    lowered_banner = cleaned_banner.lower()
+    # Treat explicit transport failure values as unavailable service state.
+    if lowered_banner in {"timeout", "dns error", "ssl error"}:
+        return "Unavailable"
+    # Treat generic exception text emitted by probe functions as unavailable state.
+    if lowered_banner.startswith("error:"):
         return "Unavailable"
     # Prefer explicit HTTP Server header because it is the strongest direct identity source.
-    for line in banner.splitlines():
+    for line in cleaned_banner.splitlines():
         # Remove surrounding whitespace from header line.
         cleaned_line = line.strip()
         # Return first Server header discovered in response.
         if cleaned_line.lower().startswith("server:"):
             return cleaned_line
     # Detect FTP-style greeting lines with code 220 and capture server descriptor text.
-    ftp_match = re.search(r"^220[\-\s](.+)$", banner, re.MULTILINE)
+    ftp_match = re.search(r"^220[\-\s](.+)$", cleaned_banner, re.MULTILINE)
+    # Detect explicit FTPS upgrade evidence when probe recorded negotiated TLS cipher details.
+    if "tls cipher:" in lowered_banner:
+        # Return FTPS-tagged greeting when FTP welcome descriptor is available.
+        if ftp_match:
+            return f"{ftp_match.group(1).strip()} (FTPS)"
+        # Fall back to generic FTPS status when greeting is not present.
+        return "FTPS (TLS Enabled)"
     # Return parsed FTP descriptor if greeting pattern was found.
     if ftp_match:
         return ftp_match.group(1).strip()
@@ -47,7 +54,7 @@ def identify_service(banner):
     for signature in service_signatures:
         # Attempt precise product/version extraction first.
         version_match = re.search(
-            rf"{re.escape(signature)}/[A-Za-z0-9\.\-_]+", banner, re.IGNORECASE
+            rf"{re.escape(signature)}/[A-Za-z0-9\.\-_]+", cleaned_banner, re.IGNORECASE
         )
         # Return full product/version token when available.
         if version_match:

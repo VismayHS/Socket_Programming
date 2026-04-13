@@ -3,35 +3,35 @@ Web Server Fingerprinting Results
 
 Host: apache.org
 HTTP Service : Server: Varnish
-HTTPS Service: Unavailable
-FTP Service  : Unavailable
-FTPS Service : Unavailable
-Primary Guess: Server: Varnish
-Response Time: 10.56 sec
-------------------------------------------------------------
-Host: ftp.debian.org
-HTTP Service : Server: Apache
-HTTPS Service: Unavailable
+HTTPS Service: Server: Apache
 FTP Service  : Unavailable
 FTPS Service : Unavailable
 Primary Guess: Server: Apache
-Response Time: 10.76 sec
+Response Time: 10.86 sec
+------------------------------------------------------------
+Host: ftp.debian.org
+HTTP Service : Server: Apache
+HTTPS Service: Server: Apache
+FTP Service  : Unavailable
+FTPS Service : Unavailable
+Primary Guess: Server: Apache
+Response Time: 11.68 sec
 ------------------------------------------------------------
 Host: httpbin.org
 HTTP Service : Server: gunicorn/19.9.0
-HTTPS Service: Unavailable
+HTTPS Service: Server: gunicorn/19.9.0
 FTP Service  : Unavailable
 FTPS Service : Unavailable
 Primary Guess: Server: gunicorn/19.9.0
-Response Time: 11.89 sec
+Response Time: 11.96 sec
 ------------------------------------------------------------
 Host: nginx.org
-HTTP Service : Unavailable
+HTTP Service : Server: nginx/1.29.3
 HTTPS Service: Server: nginx/1.29.3
 FTP Service  : Unavailable
 FTPS Service : Unavailable
 Primary Guess: Server: nginx/1.29.3
-Response Time: 11.34 sec
+Response Time: 11.47 sec
 ------------------------------------------------------------
 Host: speedtest.tele2.net
 HTTP Service : Server: nginx
@@ -39,22 +39,22 @@ HTTPS Service: Unavailable
 FTP Service  : Unavailable
 FTPS Service : Unavailable
 Primary Guess: Server: nginx
-Response Time: 1.12 sec
+Response Time: 15.65 sec
 ------------------------------------------------------------
 Host: test.rebex.net
 HTTP Service : Server: Microsoft-IIS/10.0
 HTTPS Service: Server: Microsoft-IIS/10.0
 FTP Service  : Welcome to test.rebex.net!
-FTPS Service : Unavailable
+FTPS Service : Welcome to test.rebex.net! (FTPS)
 Primary Guess: Server: Microsoft-IIS/10.0
-Response Time: 8.24 sec
+Response Time: 3.07 sec
 ------------------------------------------------------------
 
 Performance Summary
 Total Hosts Scanned: 6
-Total Scan Duration: 11.89 sec
-Average Per-Host Latency: 8.99 sec
-Throughput: 0.5 hosts/sec
+Total Scan Duration: 15.65 sec
+Average Per-Host Latency: 10.78 sec
+Throughput: 0.38 hosts/sec
 Identification Success Rate: 100.0% (6/6)
 
 Strict Accuracy: 100.0% (6/6 labeled hosts matched).

@@ -37,10 +37,22 @@ def pick_primary_service(http_service, https_service, ftp_service, ftps_service)
 
 # Read server targets from file so the scanner can test multiple hosts in one run.
 def load_servers(file_path="servers.txt"):
-    # Open the target list in read mode with UTF-8 decoding for portability.
-    with open(file_path, "r", encoding="utf-8") as file_handle:
-        # Strip whitespace and ignore blank rows so each line maps to one network endpoint.
-        return [line.strip() for line in file_handle if line.strip()]
+    # Wrap file access in try/except so missing input file is reported clearly.
+    try:
+        # Open the target list in read mode with UTF-8 decoding for portability.
+        with open(file_path, "r", encoding="utf-8") as file_handle:
+            # Strip whitespace and ignore blank rows so each line maps to one network endpoint.
+            raw_hosts = [line.strip() for line in file_handle if line.strip()]
+    # Handle missing file gracefully with an actionable error message.
+    except FileNotFoundError:
+        print(f"[error] {file_path} not found. Create the file and add at least one host.")
+        return []
+    # Handle unexpected read/decode issues without crashing the scanner.
+    except Exception as error:
+        print(f"[error] could not read {file_path}: {error}")
+        return []
+    # Deduplicate while preserving order so duplicate host entries do not spawn duplicate threads.
+    return list(dict.fromkeys(raw_hosts))
 
 
 # Read optional host-to-expected-service mappings for strict fingerprint accuracy scoring.
@@ -240,6 +252,9 @@ def main():
     if not servers:
         print("No hosts found in servers.txt")
         return
+    # Reset shared results before each run so repeated executions start from a clean state.
+    with results_lock:
+        results.clear()
     # Print startup banner for operator context.
     print("Starting Web Server Fingerprinting Tool")
     # Print thread count to show planned concurrency level.
