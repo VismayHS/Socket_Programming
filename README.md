@@ -1,168 +1,226 @@
 # Web Server Fingerprinting Tool
 
-## 1. Project Overview
+Socket-programming mini project for identifying likely server software using low-level TCP/TLS banner collection.
 
-This project is a low-level socket programming implementation in Python for identifying server software by collecting and analyzing service banners from multiple protocols.
+## 1. Project Summary
 
-It scans each target host using the following protocols:
+This project fingerprints remote hosts by opening raw socket connections and collecting protocol banners from:
 
-- HTTP over TCP on port 80.
-- HTTPS over TLS on port 443.
-- FTP over TCP on port 21.
-- FTPS using explicit TLS upgrade on FTP control channel with AUTH TLS.
+- HTTP (TCP 80)
+- HTTPS (TLS over TCP 443)
+- FTP (TCP 21)
+- FTPS (explicit TLS upgrade using `AUTH TLS` on FTP control channel)
 
-It then identifies likely server products and versions, measures performance, and writes a full report.
+After scanning, it extracts probable service names/versions, computes performance metrics, optionally validates against labeled ground truth, and writes a detailed report to `results.txt`.
 
-## 2. Requirement Coverage (Rubric Mapping)
+## 2. Key Features
 
-- Direct TCP or UDP socket usage: implemented using Python socket APIs directly without high-level HTTP clients.
-- SSL or TLS secure communication: HTTPS scanning via TLS handshake and FTPS probe via AUTH TLS.
-- Multiple concurrent clients: one thread per host for concurrent scanning.
-- Network socket communication only: all probing done by socket connections to remote hosts.
-- Performance evaluation: reports latency, throughput, and identification success rate.
-- Accuracy evaluation: strict labeled evaluation supported via ground_truth.csv.
+- Low-level socket communication (no high-level HTTP client libraries)
+- TLS-based HTTPS probing
+- FTPS negotiation attempt with cipher reporting
+- Multi-host concurrent scanning using threads
+- Banner parsing and service/version identification
+- Per-host latency tracking and run-level performance summary
+- Optional strict accuracy evaluation with `ground_truth.csv`
+- Submission-friendly text report generation
 
-Relevant files for these requirements:
+## 3. Technology and Networking Concepts
 
-- main.py
-- banner_grabber.py
-- ssl_scanner.py
-- service_identifier.py
+- Language: Python 3
+- Core modules: `socket`, `ssl`, `threading`, `time`, `csv`, `re`
 
-## 3. Implemented Features
+Networking concepts used:
 
-- HTTP banner grabbing.
-- HTTPS banner grabbing with TLS.
-- FTP greeting banner grabbing.
-- FTPS negotiation attempt and TLS cipher capture.
-- Service identification and version extraction.
-- Concurrent multi-host scanning.
-- Robust error handling for DNS, timeout, and SSL errors.
-- Report generation in results.txt.
-- Performance summary metrics.
-- Strict accuracy computation against labeled ground truth.
+- TCP client sockets
+- TLS handshake and secure channel setup
+- Application-layer protocol probing (HTTP/FTP)
+- Concurrent client design (one thread per target host)
 
-## 4. How It Works (Step-by-Step)
+## 4. Folder Structure
 
-1. Target loading: hosts are read from servers.txt.
-1. Concurrent scanning: main.py starts one thread per host.
-1. Per-host protocol probes: HTTP over raw TCP, HTTPS after TLS handshake, FTP greeting read, and FTPS attempted with AUTH TLS.
-1. Fingerprinting: service_identifier.py parses banners and headers such as Server and applies known signatures with regex version matching.
-1. Result aggregation: thread-safe append to shared results list and primary service guess selection.
-1. Evaluation and report: performance summary computed, optional strict accuracy computed if ground_truth.csv exists, and final report saved to results.txt.
+```text
+CN-Project/
+|- main.py
+|- banner_grabber.py
+|- ssl_scanner.py
+|- service_identifier.py
+|- servers.txt
+|- ground_truth.csv
+|- results.txt
+|- SUBMISSION_CHECKLIST.md
+`- README.md
+```
 
-## 5. Architecture
+## 5. File Responsibilities
 
-Text flow:
+- `main.py`: orchestration, threading, metrics, strict accuracy, result file writing
+- `banner_grabber.py`: HTTP/FTP/FTPS raw socket probes
+- `ssl_scanner.py`: HTTPS probe over TLS
+- `service_identifier.py`: banner parsing and signature matching
+- `servers.txt`: input host list (one hostname per line)
+- `ground_truth.csv`: expected labels for strict accuracy checks
+- `results.txt`: generated scan report
 
-servers.txt -> main.py (thread per host) -> banner_grabber.py and ssl_scanner.py (network probes) -> service_identifier.py (fingerprinting) -> results.txt (host-level results plus performance plus accuracy)
+## 6. End-to-End Workflow
 
-## 6. Project Structure
+1. Load targets from `servers.txt`.
+2. Start one worker thread per host.
+3. For each host, run HTTP, HTTPS, FTP, and FTPS probes.
+4. Parse banners and infer service identity.
+5. Select a `Primary Guess` per host.
+6. Compute performance metrics (latency, throughput, success rate).
+7. Optionally compute strict accuracy from `ground_truth.csv`.
+8. Save full output to `results.txt`.
 
-.
+## 7. Setup Instructions
 
-- main.py
-- banner_grabber.py
-- ssl_scanner.py
-- service_identifier.py
-- servers.txt
-- ground_truth.csv
-- results.txt
-- SUBMISSION_CHECKLIST.md
-- README.md
+### Prerequisites
 
-## 7. How to Run
+- Python 3.8 or newer
+- Internet connectivity
 
-Prerequisites:
+### Step-by-step setup
 
-- Python 3.8 or newer.
-- Internet connectivity.
+1. Open terminal in the project folder.
+2. Verify Python installation:
 
-Run steps:
+```bash
+python --version
+```
 
-1. Add targets in servers.txt with one hostname per line.
-1. Optionally update ground_truth.csv with strict accuracy labels.
-1. Run the scanner using python main.py.
+3. (Optional but recommended) Create and activate a virtual environment:
 
-Outputs:
+```bash
+python -m venv .venv
+```
 
-- Live terminal scan progress.
-- Full report in results.txt.
+Windows PowerShell:
 
-## 8. Input Files
+```powershell
+.\.venv\Scripts\Activate.ps1
+```
 
-servers.txt format example:
+No third-party dependencies are required.
 
+## 8. Input Configuration
+
+### `servers.txt`
+
+Add one hostname per line:
+
+```text
 nginx.org
 apache.org
 httpbin.org
+test.rebex.net
+```
 
-ground_truth.csv format example:
+### `ground_truth.csv` (optional)
 
+Use this only if you want strict labeled evaluation:
+
+```csv
 host,expected_service
 nginx.org,nginx
 apache.org,Varnish
+httpbin.org,gunicorn
+```
 
-## 9. Output File (results.txt)
+## 9. Usage
 
-Per host, the report includes:
+Run the scanner:
 
-- HTTP Service.
-- HTTPS Service.
-- FTP Service.
-- FTPS Service.
-- Primary Guess.
-- Response Time.
+```bash
+python main.py
+```
 
-Summary section includes:
+You will see:
 
-- Total Hosts Scanned.
-- Total Scan Duration.
-- Average Per-Host Latency.
-- Throughput in hosts per second.
-- Identification Success Rate.
-- Strict Accuracy when labels are available.
+- live `[scan]` and `[done]` logs for each host
+- final performance summary in terminal
+- strict accuracy status (if labels are available)
 
-## 10. Viva and Demo Section
+Main report output:
 
-### A. Recommended Demo Flow (5 to 8 minutes)
+- `results.txt`
 
-1. Problem statement in 30 to 45 seconds: explain banner-based server fingerprinting using low-level sockets.
-1. Architecture in 1 minute: show file responsibilities and scan pipeline.
-1. Code walkthrough in 2 to 3 minutes: main.py for threading and metrics, banner_grabber.py for HTTP and FTP and FTPS sockets, ssl_scanner.py for HTTPS TLS handshake, and service_identifier.py for banner parsing.
-1. Live execution in 1 to 2 minutes: run python main.py and show concurrent scan logs plus summary.
-1. Results interpretation in 1 minute: open results.txt and explain performance and strict accuracy lines.
+## 10. Output Details (`results.txt`)
 
-### B. Viva Questions You Are Likely to Get
+For each host:
 
-1. Why TCP and not UDP: HTTP and HTTPS and FTP are connection-oriented and rely on reliable ordered delivery.
-1. Where secure communication is implemented: HTTPS uses TLS-wrapped sockets and FTPS uses AUTH TLS on FTP control channel.
-1. How concurrency is implemented: one thread per host and a lock-protected shared results list.
-1. How correctness is evaluated: strict accuracy compares detected signatures against labels in ground_truth.csv.
-1. What limitations exist: banner masking, network filtering, and latency can reduce visible identity data.
+- HTTP Service
+- HTTPS Service
+- FTP Service
+- FTPS Service
+- Primary Guess
+- Response Time
 
-### C. Demo Tips for Better Evaluation
+Summary block:
 
-- Keep 5 to 8 stable hosts in servers.txt for reproducible output.
-- Keep matching labels in ground_truth.csv for visible strict accuracy scoring.
-- Run once before viva to avoid DNS surprises during demonstration.
-- Explicitly connect output metrics to rubric terms such as latency, throughput, scalability, and secure communication.
+- Total Hosts Scanned
+- Total Scan Duration
+- Average Per-Host Latency
+- Throughput (hosts/sec)
+- Identification Success Rate
+- Strict Accuracy
 
-## 11. Limitations
+## 11. Rubric Mapping
 
-- Banner masking or reverse proxies can hide true backend identity.
-- Firewall rules and rate limiting can cause timeouts.
-- Accuracy depends on publicly exposed service metadata.
+- Direct socket communication: `banner_grabber.py`, `ssl_scanner.py`
+- Secure communication (TLS): `ssl_scanner.py`, FTPS logic in `banner_grabber.py`
+- Concurrent clients: thread-per-host model in `main.py`
+- Performance evaluation: summary generated in `main.py` and written to `results.txt`
+- Accuracy evaluation: `ground_truth.csv` comparison in `main.py`
 
-## 12. Future Improvements
+## 12. GitHub Upload Steps (For Submission)
 
-- Add UDP-based probing where relevant.
-- Add retry and backoff policy for unstable links.
-- Add richer fingerprint database and confidence scoring.
-- Add CSV and JSON export for analytics.
+Use these commands if your project is not yet pushed:
 
-## 13. Author
+```bash
+git init
+git add .
+git commit -m "Initial project submission: Web Server Fingerprinting Tool"
+git branch -M main
+git remote add origin https://github.com/<your-username>/<your-repo-name>.git
+git push -u origin main
+```
 
-Amar Nawadagi
+If the repo is already connected:
 
+```bash
+git add .
+git commit -m "Update README and submission docs"
+git push
+```
+
+After pushing, submit this link:
+
+```text
+https://github.com/<your-username>/<your-repo-name>
+```
+
+## 13. Demo / Viva Quick Plan
+
+1. Explain objective: fingerprint servers with low-level sockets.
+2. Show architecture and file roles.
+3. Run `python main.py` live.
+4. Open `results.txt` and explain host-wise fields.
+5. Highlight performance and strict accuracy lines.
+
+## 14. Limitations
+
+- Hidden or spoofed banners can reduce identification quality.
+- Firewalls, rate limits, or DNS failures can affect results.
+- Banner-based fingerprinting cannot always reveal backend services behind proxies/CDNs.
+
+## 15. Future Improvements
+
+- Add richer signature database and confidence scores.
+- Add retry/backoff for unstable targets.
+- Export report in CSV/JSON format.
+- Add optional port scanning phase before probing.
+
+## 16. Author
+
+Amar Nawadagi  
 CSE (AI/ML)
