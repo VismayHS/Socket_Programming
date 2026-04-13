@@ -7,7 +7,7 @@ HTTPS Service: Server: Apache
 FTP Service  : Unavailable
 FTPS Service : Unavailable
 Primary Guess: Server: Apache
-Response Time: 10.86 sec
+Response Time: 10.81 sec
 ------------------------------------------------------------
 Host: ftp.debian.org
 HTTP Service : Server: Apache
@@ -15,7 +15,7 @@ HTTPS Service: Server: Apache
 FTP Service  : Unavailable
 FTPS Service : Unavailable
 Primary Guess: Server: Apache
-Response Time: 11.68 sec
+Response Time: 11.21 sec
 ------------------------------------------------------------
 Host: httpbin.org
 HTTP Service : Server: gunicorn/19.9.0
@@ -23,7 +23,7 @@ HTTPS Service: Server: gunicorn/19.9.0
 FTP Service  : Unavailable
 FTPS Service : Unavailable
 Primary Guess: Server: gunicorn/19.9.0
-Response Time: 11.96 sec
+Response Time: 12.15 sec
 ------------------------------------------------------------
 Host: nginx.org
 HTTP Service : Server: nginx/1.29.3
@@ -31,7 +31,7 @@ HTTPS Service: Server: nginx/1.29.3
 FTP Service  : Unavailable
 FTPS Service : Unavailable
 Primary Guess: Server: nginx/1.29.3
-Response Time: 11.47 sec
+Response Time: 11.62 sec
 ------------------------------------------------------------
 Host: speedtest.tele2.net
 HTTP Service : Server: nginx
@@ -39,7 +39,7 @@ HTTPS Service: Unavailable
 FTP Service  : Unavailable
 FTPS Service : Unavailable
 Primary Guess: Server: nginx
-Response Time: 15.65 sec
+Response Time: 15.77 sec
 ------------------------------------------------------------
 Host: test.rebex.net
 HTTP Service : Server: Microsoft-IIS/10.0
@@ -47,13 +47,13 @@ HTTPS Service: Server: Microsoft-IIS/10.0
 FTP Service  : Welcome to test.rebex.net!
 FTPS Service : Welcome to test.rebex.net! (FTPS)
 Primary Guess: Server: Microsoft-IIS/10.0
-Response Time: 3.07 sec
+Response Time: 4.28 sec
 ------------------------------------------------------------
 
 Performance Summary
 Total Hosts Scanned: 6
-Total Scan Duration: 15.65 sec
-Average Per-Host Latency: 10.78 sec
+Total Scan Duration: 15.77 sec
+Average Per-Host Latency: 10.97 sec
 Throughput: 0.38 hosts/sec
 Identification Success Rate: 100.0% (6/6)
 

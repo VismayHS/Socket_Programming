@@ -16,10 +16,12 @@ After scanning, it extracts probable service names/versions, computes performanc
 ## 2. Key Features
 
 - Low-level socket communication (no high-level HTTP client libraries)
+- TCP-only transport for all probes (`socket.SOCK_STREAM`; no UDP probes)
 - TLS-based HTTPS probing
 - FTPS negotiation attempt with cipher reporting
 - Multi-host concurrent scanning using threads
 - Banner parsing and service/version identification
+- Bounded connection deadlines per probe to avoid long hangs on multi-IP hosts
 - Per-host latency tracking and run-level performance summary
 - Optional strict accuracy evaluation with `ground_truth.csv`
 - Submission-friendly text report generation
@@ -35,6 +37,17 @@ Networking concepts used:
 - TLS handshake and secure channel setup
 - Application-layer protocol probing (HTTP/FTP)
 - Concurrent client design (one thread per target host)
+
+## 3A. TCP Requirement Compliance
+
+This project follows the requirement to use TCP for socket communication:
+
+- HTTP probe: TCP (`socket.SOCK_STREAM`) to port 80
+- HTTPS probe: TCP to port 443, then TLS handshake
+- FTP probe: TCP to port 21
+- FTPS probe: TCP to port 21, then explicit TLS upgrade with `AUTH TLS`
+
+No UDP-based probing is used.
 
 ## 4. Folder Structure
 
@@ -167,6 +180,7 @@ Summary block:
 ## 11. Rubric Mapping
 
 - Direct socket communication: `banner_grabber.py`, `ssl_scanner.py`
+- TCP usage proof: `_create_tcp_connection(...)` in `banner_grabber.py` and `ssl_scanner.py` uses `socket.SOCK_STREAM`
 - Secure communication (TLS): `ssl_scanner.py`, FTPS logic in `banner_grabber.py`
 - Concurrent clients: thread-per-host model in `main.py`
 - Performance evaluation: summary generated in `main.py` and written to `results.txt`
